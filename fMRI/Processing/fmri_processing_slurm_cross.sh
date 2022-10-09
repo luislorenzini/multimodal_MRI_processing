@@ -105,7 +105,7 @@ else
 	fsl_regfilt -i sub-${PARTICIPANT_LABEL}_${ses}_task-rest_space-T1w_desc-preproc_bold.nii.gz -f sub-${PARTICIPANT_LABEL}_${ses}_task-rest_AROMAnoiseICs.csv -d sub-${PARTICIPANT_LABEL}_${ses}_task-rest_desc-MELODIC_mixing.tsv -o sub-${PARTICIPANT_LABEL}_${ses}_task-rest_space-T1w_desc-AROMAnonaggr_bold.nii.gz
 
 	# create fake smooth file
-	cp ${OUTPUT_DIR}/sub-${PARTICIPANT_LABEL}/${ses}/func/sub-${PARTICIPANT_LABEL}_${ses}_task-rest_space-T1w_desc-	AROMAnonaggr_bold.nii.gz ${OUTPUT_DIR}/sub-${PARTICIPANT_LABEL}/${ses}/func/sub-${PARTICIPANT_LABEL}_${ses}_task-rest_space-T1w_desc-smoothAROMAnonaggr_bold.nii.gz
+	cp ${OUTPUT_DIR}/sub-${PARTICIPANT_LABEL}/${ses}/func/sub-${PARTICIPANT_LABEL}_${ses}_task-rest_space-T1w_desc-AROMAnonaggr_bold.nii.gz ${OUTPUT_DIR}/sub-${PARTICIPANT_LABEL}/${ses}/func/sub-${PARTICIPANT_LABEL}_${ses}_task-rest_space-T1w_desc-smoothAROMAnonaggr_bold.nii.gz
 
 
 fi
