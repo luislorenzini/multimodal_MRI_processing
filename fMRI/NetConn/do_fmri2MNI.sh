@@ -26,7 +26,7 @@ for subfold in $(ls -d ${fmriprepdir}/* | grep -v html); do
 			cm1="singularity exec  $FMRIPREP CompositeTransformUtil --disassemble $warpfile ${subname}_${ses}_from-T1w_to-MNI152NLin6Asym"
 			echo $cm1;
 			$cm1;
-			cm2="antsApplyTransforms -d 4 -i $funcfile -r $template -o ${subfold}/${ses}/func/${subname}_${ses}_task-rest_space-MNI4mm_AROMAnonaggr_bold.nii.gz -t 01_${subname}_${ses}_from-T1w_to-MNI152NLin6Asym_DisplacementFieldTransform.nii.gz -n  BSpline -v"; 
+			cm2="antsApplyTransforms -d 3 -e 3 -i $funcfile -r $template -o ${subfold}/${ses}/func/${subname}_${ses}_task-rest_space-MNI4mm_AROMAnonaggr_bold.nii.gz -t 01_${subname}_${ses}_from-T1w_to-MNI152NLin6Asym_DisplacementFieldTransform.nii.gz -n  BSpline -v"; 
 			echo $cm2; 
 			$cm2;
 
