@@ -1,14 +1,35 @@
-SCRIPTS_DIR=/home/llorenzini/lood_storage/divi/Projects/ExploreASL/insight46/scripts/DTI
-RUN_DIR=/home/llorenzini/lood_storage/divi/Projects/ExploreASL/insight46/scripts/
-ORIG_BIDS_DIR=/home/llorenzini/lood_storage/divi/Projects/ExploreASL/insight46/raw
-processing_BIDS_DIR=/scratch/llorenzini/insight46_DTI/raw
-OUTPUT_DIR=/scratch/llorenzini/insight46_DTI/derivatives
-final_OUTPUT_DIR=/home/llorenzini/lood_storage/divi/Projects/ExploreASL/insight46/derivatives
-orig_WORK_DIR=/scratch/llorenzini/insight46_DTI/logs
-ATLAS_FILE=/home/llorenzini/lood_storage/divi/Projects/ExploreASL/insight46/scripts/schaeffer_100.nii.gz
-session=ses-01 # Process baseline or follow-up?
+### This scripts calls the DTI  processing pipeline in 'dti_processing_slurm.sh' 
+# start with longitudinal pipeline for now
+
+# cohort specific settings (to be changed)
+studydir=/home/radv/llorenzini/my-rdisk/RNG/Projects/ExploreASL/EPAD
+processing_BIDS_DIR=~/my-scratch/EPAD_dti/raw
+OUTPUT_DIR=~/my-scratch/EPAD_dti/derivatives
+orig_WORK_DIR=~/my-scratch/EPAD_dti/logs
+dtishell=single # multi or single
 
 
+
+SCRIPTS_DIR=$studydir/scripts/multimodal_MRI_processing/DTI
+RUN_DIR=$studydir/scripts
+ORIG_BIDS_DIR=$studydir/raw
+final_OUTPUT_DIR=$studydir/derivatives
+ATLAS_FILE=$studydir/scripts/multimodal_MRI_processing/atlases/schaeffer_100.nii.gz
+#ATLAS_FILE=$studydir/scripts/fMRI/BN_Atlas_246_2mm.nii.gz
+session=$1 # which session to be processed?
+
+##
+if [[ dtishell=="single" ]]; then 
+
+	RECON_SPEC=$SCRIPTS_DIR/dhollander_ss3t_gqi.json;
+	acq="singleshell"
+
+elif  [[ dtishell=="multi" ]]; then
+
+	RECON_SPEC=$SCRIPTS_DIR/dhollander_msmt_gqi.json; 	
+	acq="multishell"
+
+fi
 
 
 # create final output directory if needed
@@ -40,9 +61,9 @@ cd $RUN_DIR
 
 
 mkdir $processing_BIDS_DIR/$bidsname
-cp -rf $subjectname/$session $processing_BIDS_DIR/$bidsname
+cp -rf $subjectname/$session $processing_BIDS_DIR/$bidsname/
 
-sbatch $SCRIPTS_DIR/dti_processing_slurm.sh $processing_BIDS_DIR $OUTPUT_DIR $PARTICIPANT_LABEL $WORK_DIR $final_OUTPUT_DIR $ATLAS_FILE $session;
+sbatch $SCRIPTS_DIR/dti_processing_slurm.sh $processing_BIDS_DIR $OUTPUT_DIR $PARTICIPANT_LABEL $WORK_DIR $final_OUTPUT_DIR $ATLAS_FILE $session $RECON_SPEC;
 
 
 
@@ -55,6 +76,13 @@ sbatch $SCRIPTS_DIR/dti_processing_slurm.sh $processing_BIDS_DIR $OUTPUT_DIR $PA
 
 
 while [[ $(ls $orig_WORK_DIR/ | wc -l) = 5 ]]; do 
+
+
+
+
+
+
+
 sleep 10; 
 done
 

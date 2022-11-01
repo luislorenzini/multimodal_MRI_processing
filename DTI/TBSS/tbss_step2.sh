@@ -2,8 +2,8 @@
 
 # after having run the first step, you should go through the index.html file created and check whether the images are good or have artefacts/other problems. 
 #save the IDs that you wish to exclude from the analyiss in "QC_excluded.txt"
-basedir=/home/llorenzini/lood_storage/divi/Projects/ExploreASL/insight46
-fadir=${basedir}/derivatives/qsirecon
+basedir=/home/radv/llorenzini/my-rdisk/RNG/Projects/ExploreASL/EPAD/
+#fadir=${basedir}/derivatives/qsirecon
 tbssdir=${basedir}/derivatives/TBSS
 MD=0
 
@@ -52,22 +52,22 @@ $cm5
 
 #TBSS_non_FA
 
-if [[ $MD -eq 1 ]]; then 
+#if [[ $MD -eq 1 ]]; then 
 	
-	mkdir ${tbssdir}/MD;
-	cd ${tbssdir}/MD/;	
-	# first copy the imaged and give the right name 
-	for mdfile in `ls $fadir/sub-*/ses*/dwi/*desc-md_gqiscalar.nii.gz`; do 
-		cp  $mdfile ${tbssdir}/MD/; 
-		flname=`basename $mdfile`
-		mv $flname ${flname//md_gqiscalar.nii.gz/fa1_gqiscalar.nii.gz}
-	done
+#	mkdir ${tbssdir}/MD;
+#	cd ${tbssdir}/MD/;	
+#	# first copy the imaged and give the right name 
+#	for mdfile in `ls $fadir/sub-*/ses*/dwi/*desc-md_gqiscalar.nii.gz`; do 
+#		cp  $mdfile ${tbssdir}/MD/; 
+#		flname=`basename $mdfile`
+#		mv $flname ${flname//md_gqiscalar.nii.gz/fa1_gqiscalar.nii.gz}
+#	done
+#
+#fi 
 
-fi 
+#cd $tbssdir	
+#cm6="tbss_non_FA MD"
 
-cd $tbssdir	
-cm6="tbss_non_FA MD"
+#echo "tbss_non_FA MD"
 
-echo "tbss_non_FA MD"
-
-$cm6
+#$cm6
