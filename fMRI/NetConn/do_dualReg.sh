@@ -6,7 +6,7 @@ BIDS_DIR=/home/llorenzini/lood_storage/divi/Projects/ExploreASL/insight46
 derivativesdir=$BIDS_DIR/derivatives
 fmriprepdir=$derivativesdir/fmriprep
 DRdir=$derivativesdir/DualRegression
-atlasfile=$BIDS_DIR/multimodal_MRI_processing/atlases/yeo-17-liberal_network_4mm.nii.gz ## Default is YEO networks
+atlasfile=$BIDS_DIR/scripts/multimodal_MRI_processing/atlases/yeo-17-liberal_network_4mm.nii.gz ## Default is YEO networks
 scratchfold=/scratch/llorenzini/insight46/derivatives # Derivative folder where to run it if it does not work on local directories 
 
 #make outputdirectory
