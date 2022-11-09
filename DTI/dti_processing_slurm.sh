@@ -6,7 +6,7 @@
 #SBATCH --mem=32000              # max memory per node
 # Request 36 hours run time
 #SBATCH -t 36:0:0
-#SBATCH --partition=rng-long  # rng-short is default, but use rng-long if time exceeds 7h
+#SBATCH --partition=luna-long  # rng-short is default, but use rng-long if time exceeds 7h
 #SBATCH --nice=1000			# be nice
 
 module load Anaconda3/2021.11
@@ -29,6 +29,11 @@ FS_LICENSE=/home/radv/llorenzini/license.txt
 final_OUTPUT_DIR=$5
 session=$7
 RECON_SPEC=$8
+
+
+echo $RECON_SPEC
+
+sleep 10
 
 if [[ "$RECON_SPEC" == *"ss3t"* ]]; then
 	dtistring=ss3t; 
