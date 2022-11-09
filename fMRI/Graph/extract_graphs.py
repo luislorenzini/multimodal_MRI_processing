@@ -4,8 +4,7 @@
 Script to extract graph properties (as .csv file)
 Connectome input has to be in .csv format
 
-Created by Martijn Piet
-Last updated on 30-5-2022
+Created by Luigi Lorenzini
 """
 
 # Import libraries
@@ -20,7 +19,7 @@ import glob
 from nilearn import plotting 
 
 # Define data
-bidsdir="/home/llorenzini/lood_storage/divi/Projects/ExploreASL/insight46"
+bidsdir="/home/radv/llorenzini/my-rdisk/RNG/Projects/ExploreASL/EPAD"
 cohort = os.path.basename(bidsdir)
 atlas_info = pd.read_csv(os.path.join(bidsdir,"scripts", "multimodal_MRI_processing", "atlases", "Schaefer2018_100Parcels_7Networks_order.txt"), sep = '\t', header=None).to_numpy() # Scheafer 100 is used
 area_names = atlas_info[:,1]
@@ -33,8 +32,8 @@ if not os.path.exists(resultdir):
 
     
 modalities = ["fc"] #["fc","dti"]
-metrics = ["ID","density","nVertices","nEdges","avgStrength",
-           "avgBetweenness","avgClustering","charPath","small_world_coef","Gamma","Lambda" ]
+metrics = ["ID", "visit", "density","nVertices","nEdges","avgStrength", "avgBetweenness","avgClustering","charPath","small_world_coef","Gamma","Lambda" ]
+
 #, 
 #          "Vis_strength", "SomMot_strength", "DorsAttn_strength", "SalVenAttn_strength", "Limbic_strength", 
 #           "Cont_strength", "Default_strength"]
@@ -48,7 +47,7 @@ netlabels_rc = netlabels.replace(netname, netnum)
 
 
 ### Other settings
-richclubnames=["K_raw_15", "K_raw_16", "K_raw_17", "K_raw_18", "K_raw_19", "K_raw_20","K_raw_21", "K_raw_22", "K_raw_23", "K_raw_24","K_raw_25", "K_norm_15", "K_norm_16", "K_norm_17", "K_norm_18", "K_norm_19",                "K_norm_20","K_norm_21", "K_norm_22",   "K_norm_23", "K_norm_24","K_norm_25"]
+richclubnames=["K_raw_15", "K_raw_16", "K_raw_17", "K_raw_18", "K_raw_19", "K_raw_20","K_raw_21", "K_raw_22", "K_raw_23", "K_raw_24","K_raw_25", "K_norm_15", "K_norm_16", "K_norm_17", "K_norm_18", "K_norm_19",  "K_norm_20","K_norm_21", "K_norm_22",   "K_norm_23", "K_norm_24","K_norm_25"]
 
 
 # Dictionaries are used to define and save data
@@ -175,58 +174,65 @@ for subname in os.listdir(datadir):   # Iterate across subjects
             # mean strenght within RSN (non binarized)
             nplab = netlabels.to_numpy
             allnets = []#{}
+            netstrengthnames = []
             for net in netname:
+                netind=netlabels.loc[netlabels[0] == net].index
+                
+                for net2 in netname:
 #                print(netarea_names) 
                 #allnets[net] = []
-                netind=netlabels.loc[netlabels[0] == net].index
-                netconn = np.triu(connMat[np.ix_(netind, netind)]) # Extract a submatrix
-                netstrength = np.mean(netconn)
-                allnets = np.append(allnets, netstrength)
+                    netind2=netlabels.loc[netlabels[0] == net2].index
+                    
+                    netconn = connMat[np.ix_(netind, netind2)] # Extract a submatrix
+                    netstrength = np.mean(netconn)
+                    allnets = np.append(allnets, netstrength)
+                    
+                    netstrengthnames = np.append(netstrengthnames, net + '_To_' + net2)
                 #allnets[net] = netstrength
                 
             
             ## Save properties for each subject
            
             # Global
-            glob_DF = pd.DataFrame([subname,density,nVertices,nEdges,avgStrength,avgBtwness,avgClus,cPathGraph,SWcoef,Gamma,Lambda])
+            glob_DF = pd.DataFrame([subname,ses,density,nVertices,nEdges,avgStrength,avgBtwness,avgClus,cPathGraph,SWcoef,Gamma,Lambda])
             glob_DF = pd.DataFrame.transpose(glob_DF)
             glob_DF.columns = metrics
             glob_DF.to_csv(os.path.join(os.path.join(resultdir, subname, ses, subname + "_global_graph_properties.csv"))) # Save as .csv
             
             # RSN strength
-            rsnstrength = (pd.DataFrame(np.append(subname,allnets)))
+            rsnstrength = pd.DataFrame(np.append(subname, np.append(ses,allnets)))
             rsnstrength = pd.DataFrame.transpose(rsnstrength)
-            rsnstrength.columns = np.append("ID", netname)
+            rsnstrength.columns = np.append("ID", np.append("visit", netstrengthnames))
             rsnstrength.to_csv(os.path.join(os.path.join(resultdir, subname, ses, subname + "_RSN_Strengths.csv"))) # Save as .csv
 
             # Local strength
-            localstrength = pd.DataFrame(np.append(subname,reg_strength[0]))
+            localstrength = pd.DataFrame(np.append(subname, np.append(ses,reg_strength[0])))
             localstrength = pd.DataFrame.transpose(localstrength)
-            localstrength.columns = np.append("ID", area_names)
+            localstrength.columns = np.append("ID", np.append("visit", area_names))
             localstrength.to_csv(os.path.join(os.path.join(resultdir, subname, ses, subname + "_local_Strengths.csv"))) # Save as .csv
 
             # Local betweenness
-            localbtw = pd.DataFrame(np.append(subname,reg_betweenness))
+            localbtw = pd.DataFrame(np.append(subname, np.append(ses,reg_betweenness)))
             localbtw = pd.DataFrame.transpose(localbtw)
-            localbtw.columns = np.append("ID", area_names)
+            localbtw.columns = np.append("ID", np.append("visit", area_names))
             localbtw.to_csv(os.path.join(os.path.join(resultdir, subname, ses, subname + "_local_Betwennes.csv"))) # Save as .csv
 
             # Local clust
-            localclust = pd.DataFrame(np.append(subname,reg_clust))
+            localclust = pd.DataFrame(np.append(subname,np.append(ses,reg_clust)))
             localclust = pd.DataFrame.transpose(localclust)
-            localclust.columns = np.append("ID", area_names)
+            localclust.columns = np.append("ID", np.append("visit", area_names))
             localclust.to_csv(os.path.join(os.path.join(resultdir, subname, ses, subname + "_local_clust.csv"))) # Save as .csv
 
             # Local participation
-            localpart = pd.DataFrame(np.append(subname, reg_pt))
+            localpart = pd.DataFrame(np.append(subname,np.append(ses, reg_pt)))
             localpart = pd.DataFrame.transpose(localpart)
-            localpart.columns = np.append("ID", area_names)
+            localpart.columns = np.append("ID",np.append("visit", area_names))
             localpart.to_csv(os.path.join(os.path.join(resultdir, subname, ses, subname + "_local_participation.csv"))) # Save as .csv
              
              # Rich club
-            richclub = pd.DataFrame(np.append(np.append(subname, RCraw), RCnorm))
+            richclub = pd.DataFrame(np.append(subname, np.append(np.append(ses, RCraw), RCnorm)))
             richclub = pd.DataFrame.transpose(richclub)
-            richclub.columns = np.append("ID", richclubnames)
+            richclub.columns = np.append("ID", np.append("visit", richclubnames))
             richclub.to_csv(os.path.join(os.path.join(resultdir, subname, ses, subname + "_rich_club.csv"))) # Save as .csv
 
             
@@ -236,12 +242,12 @@ print(" Saving Group Datasets")
 # Create empty dataframes
 
 glob_DF=pd.DataFrame(columns=metrics)
-rsnstrength = pd.DataFrame(columns = np.append("ID", netname))
-localstrength = pd.DataFrame(columns = np.append("ID", area_names))
-localbtw = pd.DataFrame(columns = np.append("ID", area_names))
-localclust = pd.DataFrame(columns = np.append("ID", area_names))
-localpart = pd.DataFrame(columns = np.append("ID", area_names))
-richclub = pd.DataFrame(columns = np.append("ID", richclubnames))
+rsnstrength = pd.DataFrame(columns = np.append("ID", np.append("visit", netstrengthnames)))
+localstrength = pd.DataFrame(columns = np.append("ID", np.append("visit", area_names)))
+localbtw = pd.DataFrame(columns = np.append("ID", np.append("visit", area_names)))
+localclust = pd.DataFrame(columns = np.append("ID", np.append("visit", area_names)))
+localpart = pd.DataFrame(columns = np.append("ID",np.append("visit", area_names)))
+richclub = pd.DataFrame(columns = np.append("ID", np.append("visit", richclubnames)))
 
 
 # Iterate and append
