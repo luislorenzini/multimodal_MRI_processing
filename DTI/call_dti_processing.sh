@@ -3,9 +3,9 @@
 
 # cohort specific settings (to be changed)
 studydir=/home/radv/llorenzini/my-rdisk/RNG/Projects/ExploreASL/EPAD
-processing_BIDS_DIR=~/my-scratch/EPAD_dti/raw
-OUTPUT_DIR=~/my-scratch/EPAD_dti/derivatives
-orig_WORK_DIR=~/my-scratch/EPAD_dti/logs
+processing_BIDS_DIR=/mnt/scratch-01/radv/llorenzini/EPAD_dti/raw
+OUTPUT_DIR=/mnt/scratch-01/radv/llorenzini/EPAD_dti/derivatives
+orig_WORK_DIR=/mnt/scratch-01/radv/llorenzini/EPAD_dti/logs
 dtishell=single # multi or single
 
 
@@ -45,43 +45,36 @@ fi
 cp $ORIG_BIDS_DIR/dataset_description.json $processing_BIDS_DIR/dataset_description.json
 
 
-for subjectname in `ls -d ${ORIG_BIDS_DIR}/sub-*`; do
+for subjectname in `ls -d ${ORIG_BIDS_DIR}/sub-* | head -1500 | tail -20`; do
 
 
 bidsname="`basename $subjectname`"; 
 PARTICIPANT_LABEL="`echo $bidsname | cut -d '-' -f 2`"
 WORK_DIR=${orig_WORK_DIR}/$PARTICIPANT_LABEL
 
-# Make Subject Working Directory and run DTI (sleeping 1 minute)
-mkdir $WORK_DIR;
-sleep 1m
-cd $RUN_DIR 
 
-#nvisit=`ls $subjectname | wc -l`
+if [[ -d $subjectname/$session/dwi ]]; then 
+	# Make Subject Working Directory and run DTI (sleeping 1 minute)
+	mkdir $WORK_DIR;
+	sleep 1m
+	cd $RUN_DIR 
 
-
-mkdir $processing_BIDS_DIR/$bidsname
-cp -rf $subjectname/$session $processing_BIDS_DIR/$bidsname/
-
-sbatch $SCRIPTS_DIR/dti_processing_slurm.sh $processing_BIDS_DIR $OUTPUT_DIR $PARTICIPANT_LABEL $WORK_DIR $final_OUTPUT_DIR $ATLAS_FILE $session $RECON_SPEC;
+	#nvisit=`ls $subjectname | wc -l`
 
 
+	mkdir $processing_BIDS_DIR/$bidsname
+	cp -rf $subjectname/$session $processing_BIDS_DIR/$bidsname/
+
+	sbatch $SCRIPTS_DIR/dti_processing_slurm.sh $processing_BIDS_DIR $OUTPUT_DIR $PARTICIPANT_LABEL $WORK_DIR $final_OUTPUT_DIR $ATLAS_FILE $session $RECON_SPEC;
 
 
+	#cp -rf $subjectname $processing_BIDS_DIR
+	#sbatch $SCRIPTS_DIR/dti_processing_slurm.sh $processing_BIDS_DIR $OUTPUT_DIR $PARTICIPANT_LABEL $WORK_DIR $final_OUTPUT_DIR   
 
-#cp -rf $subjectname $processing_BIDS_DIR
-#sbatch $SCRIPTS_DIR/dti_processing_slurm.sh $processing_BIDS_DIR $OUTPUT_DIR $PARTICIPANT_LABEL $WORK_DIR $final_OUTPUT_DIR   
-
-
-
-
-while [[ $(ls $orig_WORK_DIR/ | wc -l) = 5 ]]; do 
+fi
 
 
-
-
-
-
+while [[ $(ls $orig_WORK_DIR/ | wc -l) = 20 ]]; do 
 
 sleep 10; 
 done
