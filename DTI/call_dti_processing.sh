@@ -45,7 +45,7 @@ fi
 cp $ORIG_BIDS_DIR/dataset_description.json $processing_BIDS_DIR/dataset_description.json
 
 
-for subjectname in `ls -d ${ORIG_BIDS_DIR}/sub-*`; do
+for subjectname in `ls -d ${ORIG_BIDS_DIR}/sub-* | head -1500 | tail -20`; do
 
 
 bidsname="`basename $subjectname`"; 
@@ -66,9 +66,6 @@ if [[ -d $subjectname/$session/dwi ]]; then
 	cp -rf $subjectname/$session $processing_BIDS_DIR/$bidsname/
 
 	sbatch $SCRIPTS_DIR/dti_processing_slurm.sh $processing_BIDS_DIR $OUTPUT_DIR $PARTICIPANT_LABEL $WORK_DIR $final_OUTPUT_DIR $ATLAS_FILE $session $RECON_SPEC;
-
-
-
 
 
 	#cp -rf $subjectname $processing_BIDS_DIR

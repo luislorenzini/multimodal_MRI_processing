@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --tasks-per-node=1
 #SBATCH --cpus-per-task=10
-#SBATCH --mem=32000              # max memory per node
+#SBATCH --mem=1000M             # max memory per node
 # Request 36 hours run time
 #SBATCH -t 36:0:0
 #SBATCH --partition=luna-long  # rng-short is default, but use rng-long if time exceeds 7h
@@ -98,7 +98,7 @@ else
 	rm -rf ${WORK_DIR}/* # empty working directory (avoids overlaps with previous executions)	
 	cp $FS_LICENSE $WORK_DIR		
 	printf "starting qsiprep for sub-${PARTICIPANT_LABEL} from ${BIDS_DIR}\n\n"	
-	singularity run --cleanenv -B $BIDS_DIR -B $OUTPUT_DIR -B $WORK_DIR -B $RECON_SPEC -B `dirname $FS_LICENSE` $QSIPREP $BIDS_DIR $OUTPUT_DIR participant \
+	singularity --cleanenv run -B $BIDS_DIR -B $OUTPUT_DIR -B $WORK_DIR -B $RECON_SPEC -B `dirname $FS_LICENSE` $QSIPREP $BIDS_DIR $OUTPUT_DIR participant \
 	--skip-bids-validation \
 	--participant-label $PARTICIPANT_LABEL \
 	--output-space {T1w,template} \
@@ -240,4 +240,5 @@ rm -rf ${OUTPUT_DIR}/qsiprep/sub-${PARTICIPANT_LABEL}*
 rm -rf ${OUTPUT_DIR}/qsirecon/sub-${PARTICIPANT_LABEL}*
 rm -rf ${BIDS_DIR}/sub-${PARTICIPANT_LABEL}
 
-
+cd $rundir
+mv slurm-${SLURM_JOB_ID}.out $final_OUTPUT_DIR/sub-${PARTICIPANT_LABEL}/
