@@ -25,24 +25,24 @@ for subfold in $(ls -d ${fmriprepdir}/* | grep -v html); do
 			funcfile=${subfold}/${ses}/func/${subname}_${ses}_task-rest_space-MNI152Nlin6Asym_desc-smoothAROMAnonaggr_bold.nii.gz; 
 			
 			# only if it has not been run already
-			if [[ -d $outputfold/$subname/ ]]; then 
+			if [[ -d $outputfold/$subname/$ses ]]; then 
 				echo "fastECM already run for subject ${subname} session ${ses}; delete to rerun" ; 
 			else 
-				mkdir -p $outputfold/$subname/voxelwise ;
-				mkdir -p $outputfold/$subname/atlas; 
+				mkdir -p $outputfold/$subname/$ses/voxelwise ;
+				mkdir -p $outputfold/$subname/$ses/atlas; 
 
-				cp $funcfile $outputfold/$subname/voxelwise/;
-				cp $funcfile $outputfold/$subname/atlas/;
+				cp $funcfile $outputfold/$subname/$ses/voxelwise/;
+				cp $funcfile $outputfold/$subname/$ses/atlas/;
 				
 				#voxelwise extraction
-				newfunc=$outputfold/$subname/voxelwise/${subname}_${ses}_task-rest_space-MNI152Nlin6Asym_desc-smoothAROMAnonaggr_bold.nii.gz;
+				newfunc=$outputfold/$subname/$ses/voxelwise/${subname}_${ses}_task-rest_space-MNI152Nlin6Asym_desc-smoothAROMAnonaggr_bold.nii.gz;
 				matlab -nodesktop -nosplash -r "op.inputfile='$newfunc'; op.degmap=1; op.maskfile='$mask'; fastECM(op); quit "
 			
 				#atlas extraction
-				newfunc=$outputfold/$subname/atlas/${subname}_${ses}_task-rest_space-MNI152Nlin6Asym_desc-smoothAROMAnonaggr_bold.nii.gz;
+				newfunc=$outputfold/$subname/$ses/atlas/${subname}_${ses}_task-rest_space-MNI152Nlin6Asym_desc-smoothAROMAnonaggr_bold.nii.gz;
 				matlab -nodesktop -nosplash -r "op.inputfile='$newfunc'; op.degmap=1; op.maskfile='$mask'; op.atlasfile='$atlas'; fastECM(op); quit "
 				
-				rm $outputfold/$subname/*/${subname}_${ses}_task-rest_space-MNI152Nlin6Asym_desc-smoothAROMAnonaggr_bold.nii.gz
+				rm $outputfold/$subname/$ses/${subname}_${ses}_task-rest_space-MNI152Nlin6Asym_desc-smoothAROMAnonaggr_bold.nii.gz
 			fi
 		fi 
 
