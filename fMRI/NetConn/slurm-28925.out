@@ -1,0 +1,9 @@
+Dual Regression Output Directory is already existing, probably overwriting results
+creating design matrix for 1563 files
+converting txt to mat
+Starting the dual regression
+mkdir: cannot create directory '/home/radv/llorenzini/my-scratch/EPAD/Dual_Regression': File exists
+mkdir: cannot create directory '/home/radv/llorenzini/my-scratch/EPAD/Dual_Regression/scripts+logs': File exists
+/bin/cp: '/home/radv/llorenzini/my-scratch/EPAD/Dual_Regression/design.mat' and '/home/radv/llorenzini/my-scratch/EPAD/Dual_Regression/design.mat' are the same file
+/bin/cp: '/home/radv/llorenzini/my-scratch/EPAD/Dual_Regression/design.con' and '/home/radv/llorenzini/my-scratch/EPAD/Dual_Regression/design.con' are the same file
+creating common mask

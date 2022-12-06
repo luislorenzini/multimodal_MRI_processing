@@ -88,34 +88,22 @@ for subname in os.listdir(datadir):   # Iterate across subjects
         #connectomes = {}
         
         
-        cc = glob.glob(os.path.join(datadir, subname, ses, "func", subname + "_" + ses + "_task-rest_space-T1w_schaeffer_100_connectome.csv"))
-        # if "dti" in modalities:
-        #     if cohort == "EPAD":
-        #         connectomes["dti"] = os.path.join(datadir, subname, "dwi", subname + "_connectome.csv")
-        #     elif cohort == "Twins":
-        #         connectomes["dti"] = os.path.join(datadir, subname, "schaeffer_100_sift2.csv")
-    
-        # if "fc" in modalities:
-        # # Depending on the cohort the name of the file differs
-        #     if cohort == "EPAD":
-        #         connectomes["fc"] = os.path.join(datadir, subname, "FC_cc_schaefer100.csv")
-        #     elif cohort == "Twins":
-        #         connectomes["fc"] = os.path.join(datadir, subname, subname + "_ses-01_task-rest_space-T1w_schaeffer_100_connectome.csv")
-    
-        # Main loop that computes graph properties per modality
-        
+        cc = glob.glob(os.path.join(datadir, subname, ses, "func", subname + "_" + ses + "_task-rest_space-T1w_schaeffer_100_connectome_fisher_z.csv"))
+     
         if cc:
             print(f"Now processing {cc}")
             connMat = np.genfromtxt(cc[0], delimiter=',')
 #plotting.plot_matrix(connMat, vmax = 1, vmin = -1, colorbar = True)
             connMat[np.isnan(connMat)] = 0
-            connMat[connMat<0] = 0
+            connMat = abs(connMat)
+            #connMat[connMat<0] = 0
 
             # Remove all self-self connections
             connMat[np.diag_indices_from(connMat)] = 0
 
             # Matrix Thresholding
-            thr_connMat = bct.threshold_proportional(connMat, 0.3)
+            nonbin_connMat=bct.threshold_proportional(connMat, 0.3)
+            thr_connMat = bct.threshold_proportional(connMat, 0.3) # same thing but just different name for further processing
             thr_connMat[thr_connMat>0] = 1
 
             # SVD Normalization
@@ -125,35 +113,34 @@ for subname in os.listdir(datadir):   # Iterate across subjects
 #            norm_connMat = u @  s_mt @ v
 
             ### Graph properties
-            [density,nVertices,nEdges] = bct.density_und(thr_connMat)
+            [density,nVertices,nEdges] = bct.density_und(nonbin_connMat)
 
             # Regional measures
-            reg_strength = bct.strengths_und_sign(connMat) ## Compute on unthresholded matrix
-            reg_betweenness = bct.betweenness_bin(thr_connMat)
-            reg_clust = bct.clustering_coef_bu(thr_connMat)
+            reg_strength = bct.strengths_und_sign(nonbin_connMat) ## Compute on non binary matrix
+            reg_betweenness = bct.betweenness_bin(nonbin_connMat)
+            reg_clust = bct.clustering_coef_wu(nonbin_connMat)
 
             # Global measures
             avgStrength = np.mean(reg_strength[0])
             avgBtwness = np.mean(reg_betweenness)
             avgClus = np.mean(reg_clust)
-            cPathGraph = bct.charpath(thr_connMat)[0]
+            cPathGraph = bct.charpath(connMat)[0] # characteristic path length is computed on non thresholded
 
             ## Small worldness
             nRand = 50    # Amount of random graphs
-            rewirePar = 8 # Average rewire per edge in randmio
-            Alpha = 1 # Fraction of edges to rewire
+            rewirePar = 100 # Average rewire per edge in randmio
             clusRand = np.zeros(nRand)
             cPathRand =  np.zeros(nRand)
 
             #Rich Club coefficient
-            RC = bct.rich_club_bu(thr_connMat)  # check for what to extract from rich club
+            RC = bct.rich_club_bu(thr_connMat)  # rich club is done on binary matrix
             RCraw = RC[0][14:25]
             
             # Create a random graph with similair properties
             for i in range(nRand):
                 # [randMat,eff] = bct.randmio_und(thr_connMat,rewirePar)
-                randMat = bct.randomizer_bin_und(thr_connMat,Alpha).astype(float)
-                clusRand[i] = np.mean(bct.clustering_coef_bu(randMat))
+                randMat = bct.randmio_und(nonbin_connMat,rewirePar)[0] # randomize the original matrix
+                clusRand[i] = np.mean(bct.clustering_coef_wu(randMat))
                 cPathRand[i] = bct.charpath(randMat)[0]
                 RCrand = bct.rich_club_bu(randMat)  # check for what to extract from rich club
                 RCrawrand = RCrand[0][14:25]
@@ -171,7 +158,7 @@ for subname in os.listdir(datadir):   # Iterate across subjects
             reg_pt = bct.participation_coef(thr_connMat, netlabels_rc)
             
             
-            # mean strenght within RSN (non binarized)
+            # mean strenght  RSN (non binarized)
             nplab = netlabels.to_numpy
             allnets = []#{}
             netstrengthnames = []
@@ -183,7 +170,7 @@ for subname in os.listdir(datadir):   # Iterate across subjects
                 #allnets[net] = []
                     netind2=netlabels.loc[netlabels[0] == net2].index
                     
-                    netconn = connMat[np.ix_(netind, netind2)] # Extract a submatrix
+                    netconn = nonbin_connMat[np.ix_(netind, netind2)] # Extract a submatrix
                     netstrength = np.mean(netconn)
                     allnets = np.append(allnets, netstrength)
                     
