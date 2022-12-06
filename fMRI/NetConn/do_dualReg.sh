@@ -12,8 +12,10 @@ BIDS_DIR=/home/radv/llorenzini/my-rdisk/RNG/Projects/ExploreASL/EPAD
 derivativesdir=$BIDS_DIR/derivatives
 fmriprepdir=$derivativesdir/fmriprep
 DRdir=$derivativesdir/DualRegression
+
 atlasfile=$BIDS_DIR/scripts/multimodal_MRI_processing/atlases/yeo-17-liberal_network_4D_2mm_bin.nii.gz ## Default is YEO networks
 scratchfold=/home/radv/llorenzini/my-scratch/EPAD/Dual_Regression # Derivative folder where to run it if it does not work on local directories 
+
 
 #make outputdirectory
 if [[ ! -d $DRdir ]]; then 
