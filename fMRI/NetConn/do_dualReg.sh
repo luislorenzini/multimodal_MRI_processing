@@ -1,24 +1,33 @@
-## Bash script to run dual regression Using a specific atlas (either melodic or other)
-# first run the do_fmri2MNI.sh script on the uotput of fMRIprep to make sure you have fMRI files in 4mm
-module load fsl/6.0.0
+#!/bin/bash
+#SBATCH --job-name=dualreg
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=50000              # max memory per node
+#SBATCH -t 8:00:00
+#SBATCH --partition=luna-short  # rng-short is default, but use rng-long if time exceeds 7h
+#SBATCH --nice=2000
 
-BIDS_DIR=/home/llorenzini/lood_storage/divi/Projects/ExploreASL/insight46
+BIDS_DIR=/home/radv/llorenzini/my-rdisk/RNG/Projects/ExploreASL/EPAD
 derivativesdir=$BIDS_DIR/derivatives
 fmriprepdir=$derivativesdir/fmriprep
 DRdir=$derivativesdir/DualRegression
-atlasfile=$BIDS_DIR/scripts/multimodal_MRI_processing/atlases/yeo-17-liberal_network_4mm.nii.gz ## Default is YEO networks
-scratchfold=/scratch/llorenzini/insight46/derivatives # Derivative folder where to run it if it does not work on local directories 
+
+atlasfile=$BIDS_DIR/scripts/multimodal_MRI_processing/atlases/yeo-17-liberal_network_4D_2mm_bin.nii.gz ## Default is YEO networks
+scratchfold=/home/radv/llorenzini/my-scratch/EPAD/Dual_Regression # Derivative folder where to run it if it does not work on local directories 
+
 
 #make outputdirectory
 if [[ ! -d $DRdir ]]; then 
 	mkdir $DRdir; 
+	mkdir -p $scratchfold
 else
 echo "Dual Regression Output Directory is already existing, probably overwriting results" 
 
 fi 
 
 #selct inputs 
-ls $fmriprepdir/sub*/ses*/func/*MNI4mm* >  $DRdir/fmri_inputs.txt  
+ls $fmriprepdir/sub*/ses*/func/*MNI152NLin6Asym_desc-smoothAROMAnonaggr_bold.nii.gz >  $DRdir/fmri_inputs.txt  
 
 # Create Design Matrix
 echo "creating design matrix for `cat $DRdir/fmri_inputs.txt | wc -l` files"
@@ -47,9 +56,11 @@ Text2Vest $DRdir/contrast.txt $DRdir/design.con
 cd $scratchfold	
 if [[ -d $scratchfold ]]; then
 
-	cp -rf $DRdir $scratchfold/; 
+	cp -rf $DRdir/design.mat $scratchfold/design.mat; 
+	cp -rf $DRdir/design.con $scratchfold/design.con; 
+	cp -rf $DRdir/fmri_inputs.txt $scratchfold/fmri_inputs.txt; 
 	echo 'Starting the dual regression';
-	dual_regression $atlasfile 1 $scratchfold/DualRegression/design.mat $scratchfold/DualRegression/design.con 0 $scratchfold/DualRegression `cat $scratchfold/DualRegression/fmri_inputs.txt`
+	dual_regression $atlasfile 1 $scratchfold/design.mat $scratchfold/design.con 0 $scratchfold `cat $scratchfold/fmri_inputs.txt`
 else 
 
 	dual_regression $atlasfile 1 $DRdir/design.mat $DRdir/design.con 0 $DRdir `cat $DRdir/fmri_inputs.txt`; 
